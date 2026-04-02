@@ -2,24 +2,19 @@
 
 ## 1. System Design
 
-**Core user actions:**
-
-1. **Add and manage pets** — A user can register pets with basic info (name, species, age) and manage their roster of furry companions.
-2. **Schedule care tasks** — A user can create tasks for each pet (walks, feedings, medications, appointments) with a specific time, duration, priority, and frequency (one-time, daily, weekly).
-3. **View today's organized schedule** — A user can generate a sorted daily plan across all pets, see conflict warnings when tasks overlap, and track task completion.
-
 **a. Initial design**
 
-The system uses four classes:
+- Briefly describe your initial UML design.
+- What classes did you include, and what responsibilities did you assign to each?
 
-- **Task** (dataclass): Represents a single care activity. Holds description, scheduled time, duration, priority, frequency, completion status, associated pet name, and date. Responsible for marking itself complete.
-- **Pet** (dataclass): Stores pet details (name, species, age) and maintains a list of tasks. Responsible for adding/removing its own tasks.
-- **Owner**: Manages the user's profile and a collection of pets. Provides access to all tasks across every pet.
-- **Scheduler**: The scheduling "brain." Takes an Owner and orchestrates the daily plan — sorting tasks by time, filtering by pet or status, detecting time conflicts, and handling recurring task generation.
+i focused on 3 mian things which a user should be able to do which are add pets, schedule tasks for them, and see a schedule. I descigned the sistem using 4 mian classes. Task is a single activity like feeding or walking, storing things like time, duration, etc and if it's completed. It also has method to mark task as complete. Pet stores info about each pet and tracks all of its tasks, it also adds and manages those tasks. Owner manages multiple pets and gives access to get all tasks across pets. Scheduler is the logic layer, taking all the tasks form the owneer and organizes them into daily schedule, sorted by time, detcts conflits, and handles recurrnig tasks. 
 
 **b. Design changes**
 
-- Added `mark_task_complete()` to the Scheduler class in Phase 4. The original skeleton only had `handle_recurring()`, but it made more sense to have a single method that marks a task done *and* handles recurrence in one call. This keeps the calling code (in `app.py` and `main.py`) simple — one method instead of two.
+- Did your design change during implementation?
+- If yes, describe at least one change and why you made it.
+
+Yes my design changed during implementation. I added a mark_task_complete() method inside Schedueler. At first i had a seperate method for handling just recurring tasks but it felt easier to combine marking a task complete and creating the next recurring tasks in 1 step. I think this change made the flow simpler and cleaner. 
 
 ---
 
@@ -27,14 +22,17 @@ The system uses four classes:
 
 **a. Constraints and priorities**
 
-- The scheduler sorts tasks by **time** (HH:MM), which is the primary constraint — a pet owner needs to know what to do first.
-- It also filters by **completion status** (pending vs. done) and by **pet name**, so the owner can focus on what's left or on a specific pet.
-- Time was the most important constraint because a daily care routine is fundamentally about "what happens when."
+- What constraints does your scheduler consider (for example: time, priority, preferences)?
+- How did you decide which constraints mattered most?
+
+The main constraint which I focused on was time. The scjeduler sorts tasks by time as thats what matters most for dailt routines. I also considered if a task was compelete or not and filtering tasks by pet. Time was the highest priority, although, since the whole purpose of the app is to organize a daily schedule. 
 
 **b. Tradeoffs**
 
-- Conflict detection only checks for **exact time matches**, not overlapping durations. Two tasks at 10:00 trigger a warning, but a 30-minute task at 9:45 and a task at 10:00 do not.
-- This is reasonable because it keeps the logic simple and still catches the most common scheduling mistake (double-booking a time slot). A duration-aware overlap check would add complexity without much benefit for a typical pet care schedule.
+- Describe one tradeoff your scheduler makes.
+- Why is that tradeoff reasonable for this scenario?
+
+one tradeoff I made was conflict detection. right now the system only detects conflicts if 2 tasks have the same start time. It doesnt check overlapping times. I think this is a reasonable tradeoff becayse it keeps the logic simpler and still is able to catch some conflicts. Adding full overlap detction would be very complex. 
 
 ---
 
@@ -42,27 +40,34 @@ The system uses four classes:
 
 **a. How you used AI**
 
-- I used AI (Cursor agent mode) for every phase: brainstorming the class design and UML, scaffolding class skeletons, implementing method logic, generating tests, and wiring the Streamlit UI.
-- The most helpful prompts were specific and scoped — e.g., "create class skeletons based on this UML" or "implement sorting by HH:MM time." Broad prompts like "make my app better" were less useful than targeted ones.
+- How did you use AI tools during this project (for example: design brainstorming, debugging, refactoring)?
+- What kinds of prompts or questions were most helpful?
+
+I used Ai throughout the whole project to help me design teh system, create skeletons for the class,writing tests, and debugging. The most helpful prompts were specfic prompts. For example, asking how to implement sorting by time or how different classes should interact. When i aksed more general questions, the asnwers weren't as useful.
 
 **b. Judgment and verification**
 
-- The AI initially included a `timedelta` import in the Phase 1 skeleton even though recurring tasks weren't implemented yet. I removed it to keep the skeleton minimal and only added it back in Phase 4 when the code actually needed it.
-- I verified AI output by running `main.py` after every change and checking that the terminal output matched expectations, plus running `pytest` to confirm nothing broke.
+- Describe one moment where you did not accept an AI suggestion as-is.
+- How did you evaluate or verify what the AI suggested?
 
+There was a point where AI added a timedelta import even though i wasnt using recurrence yet. I removed it because i wanted to keep the code clean and only include necessary things. Later, when i implemented recurring tasts I had to add it back. To amke sure that everthing worked I tested my code constabtly running main.py to check output and using pyttest to make sure my test cases were being passed as well. These steps helped me check the AI code. 
 ---
 
 ## 4. Testing and Verification
 
 **a. What you tested**
 
-- Task completion (mark_complete flips the status), adding tasks to a pet, sorting by time, daily and weekly recurrence, one-time tasks not recurring, conflict detection for same-time tasks, no false positives for different times, empty pet schedule, and looking up a missing pet.
-- These tests are important because they cover both the "happy path" (normal usage) and edge cases (empty data, missing lookups). Sorting and recurrence are the core algorithmic behaviors — if they break, the whole scheduler is wrong.
+- What behaviors did you test?
+- Why were these tests important?
+
+I tested many key behvaiores. For example, adding takss to a pet, detetcing conflucts at the same time, handling cases with no tasks, making sure one time tasks dont get repeated and etc. These tests were very important becayse they cover normal and edge case usage. This was espcially important for sorting and recurrence since those are the main parts of the logic for the scheduler. 
 
 **b. Confidence**
 
-- 4 out of 5 stars. Every feature has at least one test, and all 10 pass.
-- With more time I would test: overlapping durations (not just exact time matches), completing a recurring task multiple times in a row, and tasks that span midnight.
+- How confident are you that your scheduler works correctly?
+- What edge cases would you test next if you had more time?
+
+I think I am pretty confident that my scheduler works correctly. all of my test cases passed and the main fucntionality functions as i would expect it to . If i had more time I would test overlapping task durations (not just exact time macthes). completing recurrinhg tasks multiple times in a row, and edge cases like if tasks go past midnight. 
 
 ---
 
@@ -70,12 +75,17 @@ The system uses four classes:
 
 **a. What went well**
 
-- The "CLI-first" workflow. Building and verifying everything in `main.py` before touching the Streamlit UI meant the backend was solid by the time I wired it up. The UI integration was smooth because the logic was already tested.
+- What part of this project are you most satisfied with?
+
+The CLI- afirst approach worked really well and I am most satified with that. Building and testing everything in main.py first made sure my backend logic was good before I thought about the UI at all. Then when i moved on to think about the UI everything went more smoothly.
 
 **b. What you would improve**
 
-- I would add duration-aware conflict detection (checking for overlapping time ranges, not just exact matches). I'd also add the ability to edit or reschedule existing tasks from the UI rather than only adding new ones.
+- If you had another iteration, what would you improve or redesign?
+If i had more time I would  add features to edit or reschedule tasks. Right now the system mostly focuses on adding and completing tasks. Also i would improve the conflciut detection logic.
 
 **c. Key takeaway**
 
-- Designing the structure first (UML and skeletons) before writing any logic made the whole project easier. When I acted as the "lead architect" and kept the design simple, the AI was most effective at filling in the implementation details. The clearer my design intent, the better the AI output.
+- What is one important thing you learned about designing systems or working with AI on this project?
+
+My key takeaway from this project is how important it is to design. the system first before coding. Once I had a clear structure everyhing was easier. Also, AI is way more helpful when given very specific instructions on what I want or need to be fixed. 
